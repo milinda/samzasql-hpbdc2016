@@ -4,8 +4,8 @@
 % Website   :: http://milinda.pathirage.org
 % Template  :: sthlm beamer theme by Benjamin Weiss (hendryolson@gmail.com, http://v42.com), 
 %              which is HEAVILY based on the HSRM beamer theme created by Benjamin Weiss
-%					     (benjamin.weiss@student.hs-rm.de), which can be found on GitHub
-%					     <https://github.com/hsrmbeamertheme/hsrmbeamertheme>.
+%			   (benjamin.weiss@student.hs-rm.de), which can be found on GitHub
+%			   <https://github.com/hsrmbeamertheme/hsrmbeamertheme>.
 
 
 
@@ -92,9 +92,9 @@ pdfcreator = {}
 %	FRAME:
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\begin{frame}[c]{Introduction}
+\begin{frame}[c]{Fast Data}
 
-This is an \alert{unofficial} beamer theme for Stockholms stads International School of the Stockholm Region. It is neither supported nor is it endorsed by Stockholms stad.
+Data has to be process as it arrives, so that we can react to changing conditions fast. 
 
 \vspace{1em}
 
@@ -112,12 +112,12 @@ Big data is often created by data that is generated at incredible speeds, such a
 %	FRAME:
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\begin{frame}[c]{Disclaimer}
-sthlm theme has been designed to build within my production environment \& support my teaching at Stockholms Stad: ISSR. \\
+\begin{frame}[c]{Lambda Architecture (LA)}
+Technology agnostic data processing architecture that attempts to balance latency, accuracy, throughput and fault-tolerance by providing a unified serving layer on top of batch and stream processing sub-systems.   \\
 
 \vspace{1em}
 
-\begin{alertblock}{Warning of Build Issues}
+\begin{alertblock}{Arch Diagram}
 I cannot guarantee that the code used to create the sthlm theme is error free nor if it will work in your production environment. \\
 \vspace{1em}
 In fact, I would highly recommend that you use mtheme instead of sthlm.
@@ -129,40 +129,74 @@ In fact, I would highly recommend that you use mtheme instead of sthlm.
 %	FRAME:
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\begin{frame}[c]{sthlm Built on HSRM \& mTheme}
-\vspace{-1cm}
-\begin{center}\begin{chronology}[2]{2012}{2018}{0.85\textwidth}
-\event[\decimaldate{1}{1}{2013}]{\decimaldate{22}{9}{2013}}{hsrm theme}
-\event[\decimaldate{22}{9}{2013}]{\decimaldate{22}{8}{2014}}{sthlm based on hsrm}
-\event[\decimaldate{22}{8}{2014}]{\decimaldate{27}{4}{2015}}{branding sthlm for Stockholms stad}
-\event[\decimaldate{27}{4}{2015}]{\decimaldate{30}{8}{2015}}{\cRed{sthlm based on hsrm \& mTheme}}
-\end{chronology}
-\end{center}
+\begin{frame}[c]{Kappa Architecture (KA)}
+Simplification of \textit{Lambda Architecture} that uses append-only immutable log as the canonical data store and batch processing is replaced by stream replay. \\
 
-sthlm Theme is heavily based on the work of Benjamin Weiss \alert{HSRM} and Matthias Vogelgesang \alert{mTheme}.
+\vspace{1em}
+
+\begin{alertblock}{Arch Diagram}
+I cannot guarantee that the code used to create the sthlm theme is error free nor if it will work in your production environment. \\
+\vspace{1em}
+In fact, I would highly recommend that you use mtheme instead of sthlm.
+\end{alertblock}
 
 \end{frame}
 
-\section*{Overview}
-\begin{frame}{Overview}
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+%\begin{frame}[c]{sthlm Built on HSRM \& mTheme}
+%\vspace{-1cm}
+%\begin{center}\begin{chronology}[2]{2012}{2018}{0.85\textwidth}
+%\event[\decimaldate{1}{1}{2013}]{\decimaldate{22}{9}{2013}}{hsrm theme}
+%\event[\decimaldate{22}{9}{2013}]{\decimaldate{22}{8}{2014}}{sthlm based on hsrm}
+%\event[\decimaldate{22}{8}{2014}]{\decimaldate{27}{4}{2015}}{branding sthlm for Stockholms stad}
+%\event[\decimaldate{27}{4}{2015}]{\decimaldate{30}{8}{2015}}{\cRed{sthlm based on hsrm \& mTheme}}
+%\end{chronology}
+%\end{center}
+
+%sthlm Theme is heavily based on the work of Benjamin Weiss \alert{HSRM} and Matthias Vogelgesang \alert{mTheme}.
+
+%\end{frame}
+
+%\section*{Overview}
+%\begin{frame}{Overview}
 % For longer presentations use hideallsubsections option
-\tableofcontents[hideallsubsections]
+%\tableofcontents[hideallsubsections]
+%\end{frame}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%
+%	SECTION: Motivation
+%
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\section*{Motivation}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}{SQL for Big Data}
+
+\centerline {Beamer is a \LaTeX\ class for creating beautiful presentations.}
+
+\begin{block}{The sthlm Beamer Theme:}
+\begin{itemize}
+	\item written using utf8 encoding $\dfrac{dy}{\cos(\theta)}=5x^4+x_0+\sqrt{5}$
+	\item should compile using pdfLaTeX $\sqrt{4}+ \sqrt[3]{4}+66$
+\end{itemize}
+\end{block}
+
 \end{frame}
 
-
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-%
-%	SECTION: BACKGROUND
-%
+%	FRAME: 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\section{Background}
-
-%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-%	FRAME: What is Beamer?
-%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-\begin{frame}{What is Beamer?}
+\begin{frame}{Programming APIs for LA and KA}
 
 \centerline {Beamer is a \LaTeX\ class for creating beautiful presentations.}
 
