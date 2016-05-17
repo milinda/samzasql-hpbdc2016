@@ -23,6 +23,7 @@
 %        LOADING PACKAGES
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 \usepackage[utf8]{inputenc}
+\usepackage{hyperref}
 
 \usepackage{chronology}
 
@@ -52,7 +53,7 @@
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 \title{SamzaSQL}
-\subtitle{Scalable Fast Data Management with Streaming SQL}
+\subtitle{Scalable Fast Data Management with \textit{Streaming SQL}}
 %\date{\small{\jobname}}
 %\date{\today}
 \author{\textbf{Milinda Pathirage} (IU), Julian Hyde (Hortonworks), Yi Pan (LinkedIn), Beth Plale (IU)}
@@ -67,6 +68,7 @@ pdfcreator = {}
 }
 
 \begin{document}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %
@@ -117,11 +119,12 @@ Technology agnostic data processing architecture that attempts to balance latenc
 
 \vspace{1em}
 
-\begin{alertblock}{Arch Diagram}
-I cannot guarantee that the code used to create the sthlm theme is error free nor if it will work in your production environment. \\
-\vspace{1em}
-In fact, I would highly recommend that you use mtheme instead of sthlm.
-\end{alertblock}
+\begin{figure}
+		\centering
+		\includegraphics[width=0.75\linewidth]{lambda.png}
+		\label{fig-lambda}
+		\caption{\tiny\textit{From: \url{https://www.oreilly.com/ideas/questioning-the-lambda-architecture}}}
+	\end{figure}
 
 \end{frame}
 
@@ -134,11 +137,12 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 
 \vspace{1em}
 
-\begin{alertblock}{Arch Diagram}
-I cannot guarantee that the code used to create the sthlm theme is error free nor if it will work in your production environment. \\
-\vspace{1em}
-In fact, I would highly recommend that you use mtheme instead of sthlm.
-\end{alertblock}
+\begin{figure}
+		\centering
+		\includegraphics[width=0.75\linewidth]{kappa.png}
+		\label{fig-lambda}
+		\caption{\tiny\textit{From: \url{https://www.oreilly.com/ideas/questioning-the-lambda-architecture}}}
+	\end{figure}
 
 \end{frame}
 
@@ -181,14 +185,12 @@ In fact, I would highly recommend that you use mtheme instead of sthlm.
 
 \begin{frame}{SQL for Big Data}
 
-\centerline {Beamer is a \LaTeX\ class for creating beautiful presentations.}
-
-\begin{block}{The sthlm Beamer Theme:}
 \begin{itemize}
-	\item written using utf8 encoding $\dfrac{dy}{\cos(\theta)}=5x^4+x_0+\sqrt{5}$
-	\item should compile using pdfLaTeX $\sqrt{4}+ \sqrt[3]{4}+66$
+	\item Hive
+	\item Presto
+	\item Drill
+	\item Impala
 \end{itemize}
-\end{block}
 
 \end{frame}
 
@@ -198,12 +200,13 @@ In fact, I would highly recommend that you use mtheme instead of sthlm.
 
 \begin{frame}{Programming APIs for LA and KA}
 
-\centerline {Beamer is a \LaTeX\ class for creating beautiful presentations.}
+\href{https://github.com/twitter/summingbird}{\textbf{Summingbird}} is a well known abstraction for writing \texit{LA} style applications while \textit{KA} style applications were mainly written in \textbf{stateful stream processing APIs} provided by frameworks like \href{http://samza.apache.org}{Apache Samza}.
 
-\begin{block}{The sthlm Beamer Theme:}
+\begin{block}{Limitations}
 \begin{itemize}
-	\item written using utf8 encoding $\dfrac{dy}{\cos(\theta)}=5x^4+x_0+\sqrt{5}$
-	\item should compile using pdfLaTeX $\sqrt{4}+ \sqrt[3]{4}+66$
+	\item Need to maintain two complex distributed systems
+	\item Users need to understand various programming abstractions 
+	\item
 \end{itemize}
 \end{block}
 
