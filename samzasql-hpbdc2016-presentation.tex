@@ -24,6 +24,8 @@
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
+\usepackage{minted}
+\usepackage{xcolor}
 
 \usepackage{chronology}
 
@@ -100,9 +102,9 @@ Data has to be process as it arrives, so that we can react to changing condition
 
 \vspace{1em}
 
-\begin{alertblock}{Big data isn't just big; it's also fast.}
+\begin{exampleblock}{Big data isn't just big; it's also fast.}
 Big data is often created by data that is generated at incredible speeds, such as click-stream data, financial ticker data, log aggregation, or sensor data. 
-\end{alertblock}
+\end{exampleblock}
 \vspace{-1.5em}
 \begin{flushright}
 \tiny\textit{John Hugg, \textbf{"Fast data: The next step after big data"}}
@@ -185,11 +187,16 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 
 \begin{frame}{SQL for Big Data}
 
+There are sevaral well known SQL-on-Hadoop solutions and most organisations that use Hadoop use one or more SQL-on-Hadoop solutions.
+
 \begin{itemize}
-	\item Hive
+	\item Apache Hive
 	\item Presto
-	\item Drill
-	\item Impala
+	\item Apache Drill
+	\item Apache Impala
+	\item Apache Kylin
+	\item Apache Tajo
+	\item Apache Pheonix
 \end{itemize}
 
 \end{frame}
@@ -200,18 +207,44 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 
 \begin{frame}{Programming APIs for LA and KA}
 
-\href{https://github.com/twitter/summingbird}{\textbf{Summingbird}} is a well known abstraction for writing \texit{LA} style applications while \textit{KA} style applications were mainly written in \textbf{stateful stream processing APIs} provided by frameworks like \href{http://samza.apache.org}{Apache Samza}.
+\href{https://github.com/twitter/summingbird}{\textbf{Summingbird}} is a well known abstraction for writing \textit{LA} style applications while \textit{KA} style applications were mainly written in \textbf{stateful stream processing APIs} provided by frameworks like \href{http://samza.apache.org}{Apache Samza}.
 
 \begin{block}{Limitations}
 \begin{itemize}
 	\item Need to maintain two complex distributed systems
 	\item Users need to understand various programming abstractions 
-	\item
+	\item Long turnaround times
 \end{itemize}
 \end{block}
 
 \end{frame}
 
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME: 
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[fragile]{Summingbird}
+\begin{exampleblock}{Word Count}
+\begin{minted}[
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,
+]{scala}
+def wordCount[P <: Platform[P]]
+    (source: Producer[P, String], store: P#Store[String, Long]) =
+      source.flatMap { sentence =>
+        toWords(sentence).map(_ -> 1L)
+      }.sumByKey(store)
+\end{minted}
+\end{exampleblock}
+
+\end{frame}
+
+\begin{frame}{Motivating Research Question}
+\Large\textbf{Can the same low barrier and the clear semantics of SQL be extended to queries that execute simultaneously over data streams (in movement) and tables (at rest)?} \\
+
+\Large\textbf{Can this be done with minimal and well-founded extensions to SQL?}
+\end{frame}
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %
 %	SECTION: UPDATESS
