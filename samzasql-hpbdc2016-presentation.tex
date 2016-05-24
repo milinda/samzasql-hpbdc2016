@@ -142,7 +142,7 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 \begin{figure}
 		\centering
 		\includegraphics[width=0.75\linewidth]{kappa.png}
-		\label{fig-lambda}
+		\label{fig-kappa}
 		\caption{\tiny\textit{From: \url{https://www.oreilly.com/ideas/questioning-the-lambda-architecture}}}
 	\end{figure}
 
@@ -179,27 +179,7 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 %
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\section*{Motivation}
-
-%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-%	FRAME:
-%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-\begin{frame}{SQL for Big Data}
-
-There are sevaral well known SQL-on-Hadoop solutions and most organisations that use Hadoop use one or more SQL-on-Hadoop solutions.
-
-\begin{itemize}
-	\item Apache Hive
-	\item Presto
-	\item Apache Drill
-	\item Apache Impala
-	\item Apache Kylin
-	\item Apache Tajo
-	\item Apache Pheonix
-\end{itemize}
-
-\end{frame}
+\section{Motivation}
 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %	FRAME: 
@@ -212,7 +192,7 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 \begin{block}{Limitations}
 \begin{itemize}
 	\item Need to maintain two complex distributed systems
-	\item Users need to understand various programming abstractions 
+	\item Users need to understand complex programming abstractions 
 	\item Long turnaround times
 \end{itemize}
 \end{block}
@@ -277,6 +257,28 @@ public class WikipediaStatsStreamTask implements StreamTask, InitableTask, Windo
 
 \end{frame}
 
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}{SQL for Big Data}
+
+There are sevaral well known SQL-on-Hadoop solutions and most organisations that use Hadoop use one or more SQL-on-Hadoop solutions.
+
+\begin{itemize}
+	\item Apache Hive
+	\item Presto
+	\item Apache Drill
+	\item Apache Impala
+	\item Apache Kylin
+	\item Apache Tajo
+	\item Apache Pheonix
+\end{itemize}
+
+\end{frame}
+
+
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %	FRAME: 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -298,18 +300,343 @@ public class WikipediaStatsStreamTask implements StreamTask, InitableTask, Windo
 %	FRAME:
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\begin{frame}[c]{Streaming SQL}
+\begin{frame}[c]{Streaming SQL - Data Model}
+
+\begin{itemize}
+	\item \textbf{Stream:} A stream S is a possibly indefinite par- titioned sequence of temporally-defined elements where an element is a tuple belonging to the schema of S.
+	\item \textbf{Partition:} A partition is a time-ordered, immutable sequence of elements existing within a single stream.
+	\item \textbf{Relation:} Analogous to a relation/table in relational databases, a relation R is a bag of tuples belonging to the schema of R. 
+\end{itemize}
 
 \end{frame}
 
 
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+\begin{frame}[fragile]{Streaming SQL - Continuous Queries}
+
+\begin{alertblock}{SamzaSQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ escapeinside=||]{sql}
+ SELECT |\colorbox{yellow}{STREAM}| rowtime, productId, units FROM Orders 
+   WHERE units > 25
+ \end{minted}
+\end{alertblock}
+
+\begin{exampleblock}{CQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize]{sql}
+ SELECT ISTREAM rowtime, productId, units FROM Orders 
+   WHERE units > 25;
+ \end{minted}
+\end{exampleblock}
+\end{frame}
 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-%
-%	SECTION: Conclusion
-%
+%	FRAME:
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[fragile]{Streaming SQL - Window Aggregations}
+
+\begin{alertblock}{SamzaSQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize,
+ escapeinside=||]{sql}
+ SELECT STREAM |\colorbox{yellow}{TUMBLE\_END}|(rowtime, INTERVAL '1' HOUR) AS rowtime,
+   productId,
+   COUNT(*) AS c,
+   SUM(units) AS units
+ FROM Orders
+ GROUP BY |\colorbox{yellow}{TUMBLE}|(rowtime, INTERVAL '1' HOUR), productId
+ \end{minted}
+\end{alertblock}
+
+\begin{exampleblock}{CQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize]{sql}
+ SELECT ISTREAM ... AS rowtime, productId, COUNT(*) AS c, 
+   SUM(units) AS units
+ FROM Orders[Range '1' HOUR, Slide '1' HOUR]
+ GROUP BY  productId;
+ \end{minted}
+\end{exampleblock}
+
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[fragile]{Streaming SQL - Sliding Windows}
+
+\begin{alertblock}{SamzaSQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize,
+ escapeinside=||]{sql}
+ SELECT STREAM rowtime, productId, units,
+   SUM(units) |\colorbox{yellow}{OVER}| (ORDER BY rowtime PARTITION BY productId RANGE
+     INTERVAL '1' HOUR PRECEDING) unitsLastHour 
+ FROM Orders;
+ \end{minted}
+\end{alertblock}
+
+\begin{exampleblock}{CQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize]{sql}
+ SELECT ISTREAM rowtime, productId, units, 
+   SUM(units) AS unitsLastHour
+ FROM Orders[Range '1' HOUR]
+ GROUP BY  productId;
+ \end{minted}
+\end{exampleblock}
+
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[fragile]{Streaming SQL - Window Joins}
+
+\begin{alertblock}{SamzaSQL}
+ \begin{minted}[
+ framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\scriptsize,
+ escapeinside=||]{sql}
+ SELECT STREAM
+   GREATEST(PacketsR1.rowtime, PacketsR2.rowtime) AS rowtime,
+   PacketsR1.sourcetime,
+   PacketsR1.packetId,
+   PacketsR2.rowtime - PacketsR1.rowtime AS timeToTravel
+ FROM PacketsR1 JOIN PacketsR2 ON
+   PacketsR1.rowtime BETWEEN
+   PacketsR2.rowtime - INTERVAL '2' SECOND
+   AND PacketsR2.rowtime + INTERVAL '2' SECOND
+   AND PacketsR1.packetId = PacketsR2.packetId
+ \end{minted}
+\end{alertblock}
+
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{SamzaSQL - Architecture}
+\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{samzasql-arch.pdf}
+	\end{figure}
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{SamzaSQL - Query Planner}
+\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{query-planner.pdf}
+	\end{figure}
+\end{frame}
+
+\section{Evaluation}
+
+\begin{frame}[c]{Evaluation - Environment}
+\begin{itemize}
+	\item 100 byte messages (based on previous Kafka benchmarks) 
+	\item 3 node (EC2 r3.2xlarge) Kafka cluster
+	\item 3 node (EC2 r3.2xlarge) YARN cluster
+	\item Each r3.2xlarge instance has 8 vCPUs, 61GB of RAM and 160 GB SSD backed storage
+	\item Data model
+		\begin{itemize}
+			\item Stream - \texttt{Orders (rowtime, productId, orderId, units)} 
+			\item Table - \texttt{Products (productId, name, supplierId)} 
+		\end{itemize}
+\end{itemize}
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{Evaluation - Filter Throughput}
+\begin{figure}
+		\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth,
+  height=4.5cm,
+  legend style={fill=none,at={(axis cs:10,25000000)},anchor=north west,draw=none},
+  ylabel={\scriptsize Throughput ($msg/m$)},
+  xlabel={\scriptsize Number of tasks},
+    ylabel near ticks,
+  xtick={2,  4, 8, 16}]
+\addplot[color=red,mark=x] coordinates {
+  (2,    5482110.5 * 2)
+  (4,   5175536.5 * 4)
+  (8, 4059675.125 * 8)
+  (16, 2614152.533 * 16)
+};
+
+\addplot[color=blue,mark=*] coordinates {
+  (2,    9073209.5 * 2)
+  (4,   8455300.875 * 4)
+  (8, 6205716 * 8)
+  (16, 4219658.563 * 16)
+};
+
+\legend{SamzaSQL, Native}
+\end{axis}
+\end{tikzpicture}
+\caption{\scriptsize\textbf{\texttt{SELECT STREAM * FROM Orders WHERE units > 50}}}
+\end{figure}
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{Evaluation - Project Throughput}
+\begin{figure}
+		\centering
+\begin{tikzpicture}
+\begin{axis}[
+width=\linewidth,
+  height=4.5cm,
+  legend style={fill=none,at={(axis cs:10,25000000)},anchor=north west,draw=none},
+  ylabel={\scriptsize Throughput ($msg/m$)},
+  xlabel={\scriptsize Number of tasks},
+    ylabel near ticks,
+  xtick={2,  4, 8, 16}]
+\addplot[color=red,mark=x] coordinates {
+  (2,    5630902.5 * 2)
+  (4,   5382646.75 * 4)
+  (8, 4220770.625 * 8)
+  (16, 2630563.5 * 16)
+};
+
+\addplot[color=blue,mark=*] coordinates {
+  (2,    8344509 * 2)
+  (4,   8121428.875 * 4)
+  (8, 6211850.5 * 8)
+  (16, 3875347.375 * 16)
+};
+
+\legend{SamzaSQL, Native}
+\end{axis}
+\end{tikzpicture}
+\caption{\scriptsize\textbf{\texttt{SELECT STREAM rowtime, productId, units FROM Orders}}}
+\end{figure}
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{Evaluation - Stream-to-Relation Join Throughput}
+\begin{figure}
+		\centering
+\begin{tikzpicture}
+\begin{axis}[
+width=\linewidth,
+  height=4.5cm,
+  legend style={fill=none,at={(axis cs:10,15000000)},anchor=north west,draw=none},
+  ylabel={\scriptsize Throughput ($msg/m$)},
+  xlabel={\scriptsize Number of tasks},
+  ylabel near ticks,
+  xtick={2,  4, 8 , 16}]
+  
+\addplot[color=red,mark=x] coordinates {
+  (2,   2095344.333 * 2 )
+  (4,   2063065.75 * 4)
+  (8, 1800993.5 * 8)
+  (16, 1222632.938 * 16)
+};
+
+\addplot[color=blue,mark=*] coordinates {
+  (2,    4283866.25 * 2)
+  (4,   4024959.25 * 4)
+  (8, 3850826.733 * 8)
+  (16, 2883865.125 * 16)
+};
+\legend{SamzaSQL,Native}
+\end{axis}
+\end{tikzpicture}
+\caption{\scriptsize\textbf{\texttt{SELECT STREAM Orders.rowtime, Orders.orderId, Orders,productId, Orders.units, Products.supplierId FROM Orders  JOIN ON Orders.productId = Products.productId}}}
+\end{figure}
+\end{frame}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	FRAME:
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\begin{frame}[c]{Evaluation - Sliding Window Throughput}
+\begin{figure}
+		\centering
+\begin{tikzpicture}
+\begin{axis}[xbar,xmin=0,bar width=8,legend columns=2,legend style={
+                    % the /tikz/ prefix is necessary here...
+                    % otherwise, it might end-up with `/pgfplots/column 2`
+                    % which is not what we want. compare pgfmanual.pdf
+            /tikz/column 2/.style={
+                column sep=5pt,
+            },
+            draw=none
+        },ytick=data,height=3.2cm,legend cell align=left,width=\linewidth,legend style={fill=none},xlabel={\scriptsize Throughput ($msg/m$)},
+ylabel={\scriptsize Number of tasks},    ylabel near ticks]
+\addplot
+coordinates
+	{(937608,1)};
+\addplot
+coordinates
+	{(1005827,1)};
+  \legend{SamzaSQL, Samza}
+\end{axis}
+\end{tikzpicture}
+\caption{\scriptsize\textbf{\texttt{SELECT STREAM rowtime, productId, units, SUM(units) OVER (PARTITION BY productId ORDER BY rowtime RANGE INTERVAL '5' MINUTE PRECEDING) unitsLastFiveMinutes FROM Orders}}}
+\end{figure}
+\textcolor{red}{\textit{Sliding window query throughput was measured in a iMac due to limitations in EC2 IO rates.}}
+\end{frame}
+
+\begin{frame}[c]{Evaluation}
+\begin{itemize}
+	\item SamzaSQL underperform 30-40\% compared to native Samza applications mainly due to message format transformations required for streaming SQL runtime
+	\item SamzaSQL join underperform mainly due to local store message serialization/deserialization overheads
+	\item Local storage effects the throughputs directly
+
+\end{itemize}
+\end{frame}
+
+
+\section{Future Work and Conclusion}
+
+
+\begin{frame}{Future Work}
+\begin{itemize}
+	\item Ordering guarantees in the presence of stream repartitioning 
+	\item Code generation to bring SamzaSQL generated physical plans closer to Samza Java API based queries  
+	\item Stream-to-relation queries
+	\item Streaming query optimizations for fast data management systems
+\end{itemize}
+\end{frame}
+
 
 \begin{frame}{Conclusion}
 
