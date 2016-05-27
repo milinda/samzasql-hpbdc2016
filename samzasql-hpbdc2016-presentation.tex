@@ -26,6 +26,11 @@
 \usepackage{hyperref}
 \usepackage{minted}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{xxcolor}
+\usetikzlibrary{shapes.misc,shapes.geometric,shapes.arrows,decorations.pathmorphing,decorations.shapes}
+\usetikzlibrary{matrix,chains,scopes,positioning,arrows,fit}
+
 
 \usepackage{chronology}
 
@@ -98,12 +103,12 @@ pdfcreator = {}
 
 \begin{frame}[c]{Fast Data}
 
-Data has to be process as it arrives, so that we can react to changing conditions fast. 
+Data has to be processed as it arrives, so that we can react immediately to changing conditions. 
 
 \vspace{1em}
 
 \begin{exampleblock}{Big data isn't just big; it's also fast.}
-Big data is often created by data that is generated at incredible speeds, such as click-stream data, financial ticker data, log aggregation, or sensor data. 
+Big data is often data that is generated at incredible speeds, such as click-stream data, financial ticker data, log aggregation, and sensor data. 
 \end{exampleblock}
 \vspace{-1.5em}
 \begin{flushright}
@@ -123,6 +128,11 @@ Big data is often created by data that is generated at incredible speeds, such a
 	\item Real-time distributed tracing for website performance and efficiency optimizations
 	\item Calculating click-through rates
 	\item Data stream enrichment
+	\begin{itemize}
+		\item Count page views by group key where group key is retrieved from a key/value storage
+		\item Enriching data streams related to use activities with user's information such as location and company
+	\end{itemize}
+	\item \textbf{At the time of writing LinkedIn uses 90 Kafka clusters deployed across 1500 nodes to process 150TB of input data daily}
 \end{itemize}
 
 \end{frame}
@@ -132,7 +142,7 @@ Big data is often created by data that is generated at incredible speeds, such a
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 \begin{frame}[c]{Lambda Architecture (LA)}
-Technology agnostic data processing architecture that attempts to balance latency, accuracy, throughput and fault-tolerance by providing a unified serving layer on top of batch and stream processing sub-systems.   \\
+LA is a technology agnostic data processing architecture that attempts to balance latency, accuracy, throughput and fault-tolerance by providing a unified serving layer on top of batch and stream processing sub-systems.   \\
 
 \vspace{1em}
 
@@ -150,7 +160,7 @@ Technology agnostic data processing architecture that attempts to balance latenc
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 \begin{frame}[c]{Kappa Architecture (KA)}
-Simplification of \textit{Lambda Architecture} that uses append-only immutable log as the canonical data store and batch processing is replaced by stream replay. \\
+Simplification of \textit{Lambda Architecture} is KA that uses append-only immutable log as the canonical data store; batch processing is replaced by stream replay. \\
 
 \vspace{1em}
 
@@ -202,7 +212,7 @@ Simplification of \textit{Lambda Architecture} that uses append-only immutable l
 
 \begin{frame}{Programming APIs for LA and KA}
 
-\href{https://github.com/twitter/summingbird}{\textbf{Summingbird}} is a well known abstraction for writing \textit{LA} style applications while \textit{KA} style applications were mainly written in \textbf{stateful stream processing APIs} provided by frameworks like \href{http://samza.apache.org}{Apache Samza}.
+\href{https://github.com/twitter/summingbird}{\textbf{Summingbird}} is a well known abstraction for writing \textit{LA} style applications.  \textit{KA} style applications are mainly written in a \textbf{stateful stream processing APIs} provided by frameworks such as \href{http://samza.apache.org}{Apache Samza}.
 
 \begin{block}{Limitations}
 \begin{itemize}
@@ -279,7 +289,7 @@ public class WikipediaStatsStreamTask implements StreamTask, InitableTask, Windo
 
 \begin{frame}{SQL for Big Data}
 
-There are sevaral well known SQL-on-Hadoop solutions and most organisations that use Hadoop use one or more SQL-on-Hadoop solutions.
+There are several well known SQL-on-Hadoop solutions and most organizations that use Hadoop use one or more SQL-on-Hadoop solutions.
 
 \begin{itemize}
 	\item Apache Hive
@@ -288,7 +298,7 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 	\item Apache Impala
 	\item Apache Kylin
 	\item Apache Tajo
-	\item Apache Pheonix
+	\item Apache Phoenix
 \end{itemize}
 
 \end{frame}
@@ -298,14 +308,19 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 %	FRAME: 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-\begin{frame}{Motivating Research Question}
-\Large{Can the same low barrier and the clear semantics of SQL be extended to queries that execute simultaneously over data \texttt{\textbf{streams}} (in movement) and \texttt{\textbf{tables}} (at rest)?} \\
+\begin{frame}{Motivating Research Questions}
+\begin{itemize}
+\item Can the same low barrier and the clear semantics of SQL be extended to queries that execute simultaneously over data \texttt{\textbf{streams}} (in movement) and \texttt{\textbf{tables}} (at rest)?
 
-\Large{Can this be done with minimal and well-founded extensions to SQL?}
+\item Can this be done with minimal and well-founded extensions to SQL?
+
+\item And with minimal latency overhead over a non-SQL-based LA/KA?
+\end{itemize}
 \end{frame}
+
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %
-%	SECTION: UPDATESS
+%	SECTION: SamzaSQL
 %
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -318,7 +333,7 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 \begin{frame}[c]{Streaming SQL - Data Model}
 
 \begin{itemize}
-	\item \textbf{Stream:} A stream S is a possibly indefinite par- titioned sequence of temporally-defined elements where an element is a tuple belonging to the schema of S.
+    \item \textbf{Stream:} A stream S is a possibly indefinite partitioned sequence of temporally-defined elements where an element is a tuple belonging to the schema of S.
 	\item \textbf{Partition:} A partition is a time-ordered, immutable sequence of elements existing within a single stream.
 	\item \textbf{Relation:} Analogous to a relation/table in relational databases, a relation R is a bag of tuples belonging to the schema of R. 
 \end{itemize}
@@ -473,6 +488,47 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 
 \section{Evaluation}
 
+% fuer Railroad-Diagramme
+\tikzset{
+  process/.style={
+    % The shape:
+    rectangle,
+    % The size:
+    minimum size=4mm,
+    % The border:
+    very thick,
+    draw=red!50!black!50,         % 50% red and 50% black,
+                                  % and that mixed with 50% white
+    % The filling:
+    top color=white,              % a shading that is white at the top...
+    bottom color=red!50!black!20, % and something else at the bottom
+    % Font
+    font={\tiny\ttfamily}
+  },
+  serde/.style={
+    % The shape:
+    rounded rectangle,
+    minimum size=4mm,
+    % The rest
+    very thick,draw=black!50,
+    top color=white,bottom color=black!20,
+    font={\tiny\ttfamily}},
+  convert/.style={
+      % The shape:
+      rounded rectangle,
+      minimum size=4mm,
+      % The rest
+      very thick,draw=blue!50!black!50,
+      top color=white,bottom color=blue!20,
+      font={\tiny\ttfamily}},
+  skip loop/.style={to path={-- ++(0,#1) -| (\tikztotarget)}}
+}
+{
+  \tikzset{terminal/.append style={text height=1.5ex,text depth=.25ex}}
+  \tikzset{nonterminal/.append style={text height=1.5ex,text depth=.25ex}}
+}
+
+
 \begin{frame}[c]{Evaluation - Environment}
 \begin{itemize}
 	\item 100 byte messages (based on previous Kafka benchmarks) 
@@ -485,6 +541,44 @@ There are sevaral well known SQL-on-Hadoop solutions and most organisations that
 			\item Table - \texttt{Products (productId, name, supplierId)} 
 		\end{itemize}
 \end{itemize}
+\end{frame}
+
+\begin{frame}[c]{Evaluation - Results}
+\begin{itemize}
+	\item SamzaSQL underperform 30-40\% compared to native Samza applications mainly due to message format transformations required in streaming SQL runtime
+	\item SamzaSQL joins underperform mainly due to local store message serialization/deserialization overheads
+	\item Local storage effects the throughputs directly
+\end{itemize}
+\begin{exampleblock}{Message processing flow}
+\begin{tikzpicture}[point/.style={coordinate},>=stealth',thick,draw=black!50,
+                    tip/.style={->,shorten >=0.007pt},every join/.style={rounded corners},
+                    hv path/.style={to path={-| (\tikztotarget)}},
+                    vh path/.style={to path={|- (\tikztotarget)}},
+                    text height=1.0ex,text depth=.2ex]     % um die Hoehe des Punktes festzuzurren
+  \matrix[ampersand replacement=\&,column sep=2mm] {
+    \node (p1)  [point]  {}; \&    \node (des)    [serde]     {Decode};                  \&
+    \node (p2)  [point]  {}; \&    \node (conv1)  [convert]  {AvrotoArray};                  \&
+    \node (p3)  [point]  {}; \&    \node (process) [process]     {Process};              \&
+    \node (p4)  [point]  {}; \&    \node (conv2) [convert]  {ArraytoAvro};                   \&
+    \node (p5)  [point]  {}; \&    \node (enc)     [serde]  {Encode};                    \&
+    \node (p6a) [point]  {}; \\
+  };
+
+  { [start chain]
+    \chainin (p1);
+    \chainin (des)    [join=by tip];
+    \chainin (p2)     [join];
+    \chainin (conv1)  [join=by tip];
+    \chainin (p3)     [join];
+    \chainin (process) [join=by tip];
+    \chainin (p4)     [join];
+    \chainin (conv2) [join=by tip];
+    \chainin (p5)     [join];
+    \chainin (enc)   [join=by tip];
+    \chainin (p6a)     [join=by tip];
+  }
+\end{tikzpicture}
+\end{exampleblock}
 \end{frame}
 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -630,31 +724,38 @@ coordinates
 \textcolor{red}{\textit{Sliding window query throughput was measured in a iMac due to limitations in EC2 IO rates.}}
 \end{frame}
 
-\begin{frame}[c]{Evaluation}
-\begin{itemize}
-	\item SamzaSQL underperform 30-40\% compared to native Samza applications mainly due to message format transformations required for streaming SQL runtime
-	\item SamzaSQL join underperform mainly due to local store message serialization/deserialization overheads
-	\item Local storage effects the throughputs directly
+\section{Related Work}
 
-\end{itemize}
+\begin{frame}[c]{Related Work}
+\begin{itemize}
+	\item Eerly work on streaming SQL - TelegraphCQ, Tribecca, GSQL
+	\item CQL
+	\item Streaming SQL for Apache Flink and Apache Storm based on our work in Apache Calcite 
+	\end{itemize}
 \end{frame}
+
 
 
 \section{Future Work and Conclusion}
 
-
-\begin{frame}{Future Work}
+\begin{frame}[c]{Future Work}
 \begin{itemize}
-	\item Ordering guarantees in the presence of stream repartitioning 
 	\item Code generation to bring SamzaSQL generated physical plans closer to Samza Java API based queries  
-	\item Stream-to-relation queries
 	\item Streaming query optimizations for fast data management systems
+	\item Ordering guarantees in the presence of stream repartitioning 
+	\item Stream-to-relation queries
+	\item Intra-query optimizations
+	\item Handling out-of-order arrivals
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}{Conclusion}
-
+\begin{frame}[c]{Summary and Conclusion}
+\begin{itemize}
+	\item We propose a novel set of extensions to standard SQL for expressing streaming queries.
+	\item SamzaSQL is a implementation of proposed streaming SQL variant on top of Apache Samza.
+	\item We demonstrate that we can achieve decent amount of performance by utilizing existing libraries.
+	\item Our evaluation results shows that further improvements such as code generation is needed to bring streaming SQL runtime closer to streaming queries written in imperative languages.
+\end{itemize}
 \end{frame}
 
 \end{document}
